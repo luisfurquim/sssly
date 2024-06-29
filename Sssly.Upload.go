@@ -2,9 +2,6 @@ package sssly
 
 import (
 	"os"
-	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 func (s *Sssly) Upload(key, fname string) error {
