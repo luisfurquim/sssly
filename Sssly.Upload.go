@@ -19,12 +19,12 @@ func (s *Sssly) Upload(key, fname string) error {
 
 	fi, err = fh.Stat()
 	if err != nil {
-		Goose.Collect.Logf(1,"Error checking zip file stat: %s", err)
+		Goose.Storage.Logf(1,"Error checking zip file stat: %s", err)
 		return err
 	}
 	sz = fi.Size()
 
-	err = s.UploadFromReader(key, fh, &sz)
+	err = s.UploadFromReader(key, fh, sz)
 	if err != nil {
 		Goose.Storage.Logf(1, "Error opening %s for write: %s", key, err)
 	}
