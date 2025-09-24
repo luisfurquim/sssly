@@ -87,6 +87,8 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 				var e error
 				var upl *s3.UploadPartOutput
 
+				Goose.Storage.Logf(0,"%d: buffersize:%d", part, size)
+
 				wg.Add(1)
 				defer wg.Done()
 
@@ -97,7 +99,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 						Key:        aws.String(s.BasePath + key),
 						PartNumber: &part,
 						UploadId:   aws.String(uploadID),
-						Body:       bytes.NewReader(buffer),
+						Body:       bytes.NewReader(buffer[:size]),
 						ContentLength: &size,
 					},
 //					optFns ...func(*Options),
@@ -106,14 +108,14 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 				if e != nil {
 					err = e
 					Goose.Storage.Logf(1, "Error uploading chunk: %s", err)
+				} else {
+					mtx.Lock()
+					parts = append(parts, types.CompletedPart{
+						ETag:       upl.ETag,
+						PartNumber: aws.Int32(part),
+					})
+					mtx.Unlock()
 				}
-
-				mtx.Lock()
-				parts = append(parts, types.CompletedPart{
-					ETag:       upl.ETag,
-					PartNumber: aws.Int32(part),
-				})
-				mtx.Unlock()
 			}(i, int64(n), buf)
 
 			i++
