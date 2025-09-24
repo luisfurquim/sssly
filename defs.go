@@ -12,6 +12,7 @@ type Opt map[string]interface{}
 type Sssly struct {
 	Bucket string
 	BasePath string
+	MaxChunk int
 	Client *s3.Client
 }
 
@@ -52,3 +53,4 @@ var ErrOptionWrongTypeEndpoint error = errors.New("Option wrong type: endpoint")
 var ErrOptionRequiredBasePath error = errors.New("Option required: base path")
 var ErrOptionWrongTypeBasePath error = errors.New("Option wrong type: base path")
 
+var ErrStartingMultipartUpload error = errors.New("Error starting multipart upload")
