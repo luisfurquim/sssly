@@ -85,7 +85,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 				return err
 			}
 			
-			go func(part int32, size int64, buffer []byte) {
+			func(part int32, size int64, buffer []byte) {
 				var e error
 				var upl *s3.UploadPartOutput
 
