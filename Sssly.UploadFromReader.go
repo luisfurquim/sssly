@@ -66,6 +66,8 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 		Goose.Storage.Logf(3, "Multipart upload started. Upload ID: %s", uploadID)
 
 		for sz > 0 {
+			// yes, this is the right place to increment, before the loop body, because part numbers range from 1~10000 and not from 0~9999...
+			i++
 			if sz < int64(MaxChunk) {
 				buf = make([]byte, sz)
 			} else {
@@ -118,9 +120,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 				}
 			}(i, int64(n), buf)
 
-			i++
 			sz -= int64(n)
-
 		}
 
 		wg.Wait()
