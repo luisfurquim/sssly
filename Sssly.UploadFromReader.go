@@ -111,6 +111,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 					err = e
 					Goose.Storage.Logf(1, "Error uploading chunk: %s", err)
 				} else {
+					Goose.Storage.Logf(1, "%d: %s", part, upl.ETag)
 					mtx.Lock()
 					parts = append(parts, types.CompletedPart{
 						ETag:       upl.ETag,
