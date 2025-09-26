@@ -102,7 +102,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 						Key:        aws.String(s.BasePath + key),
 						PartNumber: &part,
 						UploadId:   aws.String(uploadID),
-						Body:       bytes.NewReader(buffer[:size]),
+						Body:       bytes.NewReader(buffer),
 						ContentLength: &size,
 					},
 //					optFns ...func(*Options),
@@ -118,7 +118,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 						PartNumber: aws.Int32(part),
 					}
 				}
-			}(i, int64(n), buf)
+			}(i, int64(n), buf[:n])
 
 			sz -= int64(n)
 		}
@@ -139,7 +139,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 			Key:        aws.String(s.BasePath + key),
 			UploadId:	aws.String(uploadID),
 			MultipartUpload: &types.CompletedMultipartUpload{
-				Parts: parts[1:i+1],
+				Parts: parts[1:i],
 			},
 		})
 
