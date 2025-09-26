@@ -64,6 +64,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 
 		uploadID = *MultipartUpload.UploadId
 		Goose.Storage.Logf(3, "Multipart upload started. Upload ID: %s", uploadID)
+		parts = make([]types.CompletedPart, (size/MaxChunk)*2)
 
 		for sz > 0 {
 			// yes, this is the right place to increment, before the loop body, because part numbers range from 1~10000 and not from 0~9999...
@@ -85,7 +86,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 				return err
 			}
 			
-			func(part int32, size int64, buffer []byte) {
+			go func(part int32, size int64, buffer []byte) {
 				var e error
 				var upl *s3.UploadPartOutput
 
@@ -111,13 +112,11 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 					err = e
 					Goose.Storage.Logf(1, "Error uploading chunk: %s", err)
 				} else {
-					Goose.Storage.Logf(1, "%d: %s", part, upl.ETag)
-					mtx.Lock()
-					parts = append(parts, types.CompletedPart{
+					Goose.Storage.Logf(3, "%d: %s", part, *upl.ETag)
+					parts[part] = types.CompletedPart{
 						ETag:       upl.ETag,
 						PartNumber: aws.Int32(part),
-					})
-					mtx.Unlock()
+					}
 				}
 			}(i, int64(n), buf)
 
@@ -140,7 +139,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 			Key:        aws.String(s.BasePath + key),
 			UploadId:	aws.String(uploadID),
 			MultipartUpload: &types.CompletedMultipartUpload{
-				Parts: parts,
+				Parts: parts[1:part+1],
 			},
 		})
 
