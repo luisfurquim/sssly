@@ -86,11 +86,11 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 				return err
 			}
 			
-			go func(part int32, size int64, buffer []byte) {
+			func(part int32, size int64, buffer []byte) {
 				var e error
 				var upl *s3.UploadPartOutput
 
-				Goose.Storage.Logf(0,"%d: buffersize:%d", part, size)
+				Goose.Storage.Logf(3,"%d: buffersize:%d", part, size)
 
 				wg.Add(1)
 				defer wg.Done()
