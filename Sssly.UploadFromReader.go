@@ -138,9 +138,9 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 			Bucket:     aws.String(s.Bucket),
 			Key:        aws.String(s.BasePath + key),
 			UploadId:	aws.String(uploadID),
-			MultipartUpload: &types.CompletedMultipartUpload{
-				Parts: parts[1:i],
-			},
+//			MultipartUpload: &types.CompletedMultipartUpload{
+//				Parts: parts[1:i],
+//			},
 		})
 
 		if err != nil {
