@@ -1,6 +1,7 @@
 package sssly
 
 import (
+	"io"
 	"bytes"
 	"errors"
 	"github.com/luisfurquim/goose"
@@ -20,6 +21,14 @@ type WriteCloser struct {
 	bytes.Buffer
 	cli *Sssly
 	key string
+}
+
+type ReadCloser struct {
+	chunk, chunks, chunkSize int32
+	consumed int32
+	cli *Sssly
+	key string
+	rd io.ReadCloser
 }
 
 type GooseG struct {
@@ -54,3 +63,4 @@ var ErrOptionRequiredBasePath error = errors.New("Option required: base path")
 var ErrOptionWrongTypeBasePath error = errors.New("Option wrong type: base path")
 
 var ErrStartingMultipartUpload error = errors.New("Error starting multipart upload")
+var ErrWrongParmCount error = errors.New("Error wrong parameter count")
