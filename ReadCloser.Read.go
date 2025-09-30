@@ -2,6 +2,7 @@ package sssly
 
 import (
 	"io"
+	"bytes"
 	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -41,13 +42,25 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 			Goose.Storage.Logf(1, "Error fetching %s for next chunk[%d]: %s", rc.key, rc.chunk, err)
 			return 0, err
 		}
+		
+		defer resp.Body.Close()
 
-		rc.rd			= resp.Body
+		n, err = resp.Body.Read(rc.buffer)
+		if err != nil {
+			Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
+			return 0, err
+		}
+
 		rc.consumed = 0
+		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[8:rc.chunkSize]))
 	}
 
 	n, err = rc.rd.Read(buf)
-	if err != nil {
+	if err == io.EOF {
+		if rc.chunk < rc.chunks {
+			err = nil
+		}
+	} else if err != nil {
 		Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
 		return 0, err
 	}

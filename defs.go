@@ -29,6 +29,7 @@ type ReadCloser struct {
 	cli *Sssly
 	key string
 	rd io.ReadCloser
+	buffer []byte
 }
 
 type GooseG struct {
