@@ -16,6 +16,7 @@ func (s *Sssly) NewReadCloser(key string, chunkSchema ...int32) (io.ReadCloser, 
 	}
 
 	if len(chunkSchema) == 0 {
+		Goose.Storage.Logf(1, "Monolithic reader: %s", key)
 		resp, err = s.Client.GetObject(
 			context.TODO(),
 			&s3.GetObjectInput{
