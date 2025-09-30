@@ -17,8 +17,6 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 
 	Goose.Storage.Logf(0, "Going to read: %d", rc.chunk)
 
-	defer panic("Stopped!")
-
 	if rc.rd == nil || rc.consumed>=rc.chunkSize {
 		rc.chunk++
 		if rc.chunk > rc.chunks {
@@ -58,7 +56,7 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 			return 0, err
 		}
 
-		Goose.Storage.Logf(0, "Removing header and trailer: % 2x .. % 2x .. % 2x", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[rc.chunkSize:rc.chunkSize+16])
+		Goose.Storage.Logf(0, "Removing header and trailer: %d % 2x .. % 2x .. % 2x", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[rc.chunkSize:rc.chunkSize+16])
 		rc.consumed = 0
 		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[8:rc.chunkSize]))
 	}
@@ -68,6 +66,9 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	if err == io.EOF {
 		if rc.chunk < rc.chunks {
 			err = nil
+			if n == 0 {
+				defer panic("Stopped!")
+			}
 		}
 	} else if err != nil {
 		Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
