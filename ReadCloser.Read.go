@@ -20,6 +20,8 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		if rc.chunk > rc.chunks {
 			return 0, io.EOF
 		}
+		
+		Goose.Storage.Logf(0, "Fetching new chunk: %d", rc.chunk)
 
 		if rc.rd != nil {
 			err = rc.rd.Close()
