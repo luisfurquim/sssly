@@ -17,6 +17,8 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 
 	Goose.Storage.Logf(0, "Going to read: %d", rc.chunk)
 
+	defer panic("Stopped!")
+
 	if rc.rd == nil || rc.consumed>=rc.chunkSize {
 		rc.chunk++
 		if rc.chunk > rc.chunks {
