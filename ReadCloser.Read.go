@@ -46,7 +46,7 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		defer resp.Body.Close()
 
 		n, err = resp.Body.Read(rc.buffer)
-		if err != nil {
+		if err != nil && err != io.EOF {
 			Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
 			return 0, err
 		}
