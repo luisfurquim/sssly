@@ -45,12 +45,14 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		
 		defer resp.Body.Close()
 
+		Goose.Storage.Logf(0, "Fetching new chunk: %d", rc.chunk)
 		n, err = resp.Body.Read(rc.buffer)
 		if err != nil && err != io.EOF {
 			Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
 			return 0, err
 		}
 
+		Goose.Storage.Logf(0, "Removing header and trailer: % 2x .. % 2x .. % 2x", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[rc.chunkSize:rc.chunkSize+16])
 		rc.consumed = 0
 		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[8:rc.chunkSize]))
 	}
