@@ -58,8 +58,8 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 
 		Goose.Storage.Logf(0, "Removing header and trailer: %d % 2x .. % 2x .. % 2x", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[rc.chunkSize:rc.chunkSize+16])
 		rc.consumed = 0
-		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[:rc.chunkSize]))
-//		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[8:rc.chunkSize]))
+//		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[:rc.chunkSize]))
+		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[8:rc.chunkSize+8]))
 	}
 
 	n, err = rc.rd.Read(buf)
