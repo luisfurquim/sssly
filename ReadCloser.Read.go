@@ -62,6 +62,7 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	}
 
 	n, err = rc.rd.Read(buf)
+	Goose.Storage.Logf(0, "Read %d bytes: %s", n, err)
 	if err == io.EOF {
 		if rc.chunk < rc.chunks {
 			err = nil
