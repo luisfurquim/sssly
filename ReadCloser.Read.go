@@ -12,7 +12,7 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	var (
 		err error
 		resp *s3.GetObjectOutput
-		n int
+		sz, n int
 	)
 
 	Goose.Storage.Logf(0, "Going to read: %d, consumed: %d", rc.chunk, rc.consumed)
@@ -50,10 +50,13 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		defer resp.Body.Close()
 
 		Goose.Storage.Logf(0, "Fetching new chunk: %d", rc.chunk)
-		n, err = resp.Body.Read(rc.buffer)
-		if err != nil && err != io.EOF {
-			Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
-			return 0, err
+		for sz<len(rc.Buffer) && err==nil {
+			n, err = resp.Body.Read(rc.buffer[sz:])
+			if err != nil && err != io.EOF {
+				Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
+				return 0, err
+			}
+			sz += n
 		}
 
 		Goose.Storage.Logf(0, "Removing header and trailer: %d % 2x .. % 2x .. % 2x", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[rc.chunkSize:rc.chunkSize+16])
