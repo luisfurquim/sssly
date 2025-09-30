@@ -50,7 +50,7 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		defer resp.Body.Close()
 
 		Goose.Storage.Logf(0, "Fetching new chunk: %d", rc.chunk)
-		for sz<len(rc.Buffer) && err==nil {
+		for sz<len(rc.buffer) && err==nil {
 			n, err = resp.Body.Read(rc.buffer[sz:])
 			if err != nil && err != io.EOF {
 				Goose.Storage.Logf(1, "Error reading %s on chunk[%d]: %s", rc.key, rc.chunk, err)
