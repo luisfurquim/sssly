@@ -24,6 +24,7 @@ func (s *Sssly) NewReadCloser(key string, chunkSchema ...int32) (io.ReadCloser, 
 			},
 		)
 	} else {
+		Goose.Storage.Logf(0, "Multipart reader: %s", key)
 		return &ReadCloser{
 			chunks:     chunkSchema[0],
 			chunkSize:  chunkSchema[1],
