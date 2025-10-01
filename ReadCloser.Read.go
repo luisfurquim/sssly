@@ -14,7 +14,6 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		resp *s3.GetObjectOutput
 		sz, n, i int
 		chunkSize int
-		chunkInfo []byte
 	)
 
 	Goose.Storage.Logf(4, "Going to read: %d, consumed: %d", rc.chunk, rc.consumed)
@@ -75,13 +74,13 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 				break
 			} else if rc.buffer[i] >= 'a' && rc.buffer[i] <= 'f' {
 				chunkSize <<= 4
-				chunkSize += rc.buffer[i] - 'a' + 10
+				chunkSize += int(rc.buffer[i] - 'a' + 10)
 			} else if rc.buffer[i] >= 'A' && rc.buffer[i] <= 'F' {
 				chunkSize <<= 4
-				chunkSize += rc.buffer[i] - 'A' + 10
+				chunkSize += int(rc.buffer[i] - 'A' + 10)
 			} else if rc.buffer[i] >= '0' && rc.buffer[i] <= '9' {
 				chunkSize <<= 4
-				chunkSize += rc.buffer[i] - '0'
+				chunkSize += int(rc.buffer[i] - '0')
 			} else {
 				Goose.Storage.Logf(1, "Error reading %s chunkSize on chunk[%d]: %s", rc.key, rc.chunk, UnexpectedCharacter)
 				return 0, UnexpectedCharacter
