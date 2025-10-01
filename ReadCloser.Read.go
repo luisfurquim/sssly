@@ -112,8 +112,8 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		sz -= 38
 		rc.rd = bytes.NewReader(rc.buffer[:sz])
 //		rc.rd = bytes.NewReader(rc.buffer[8:rc.chunkSize+8])
-		Goose.Storage.Logf(0, "Removing trailer: %d % 2x .. % 2x", rc.chunk,  rc.buffer[:8], rc.buffer[sz:])
-		Goose.Storage.Logf(0, "Removing trailer: %d %s .. %s", rc.chunk, rc.buffer[:8], rc.buffer[sz:])
+		Goose.Storage.Logf(3, "Removing trailer: %d % 2x .. % 2x", rc.chunk,  rc.buffer[:8], rc.buffer[sz:])
+		Goose.Storage.Logf(3, "Removing trailer: %d %s .. %s", rc.chunk, rc.buffer[:8], rc.buffer[sz:])
 	}
 
 	n, err = rc.rd.Read(buf)

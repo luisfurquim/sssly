@@ -16,7 +16,7 @@ func (s *Sssly) NewReadCloser(key string, chunked ...bool) (io.ReadCloser, error
 	}
 
 	if len(chunked) == 0 {
-		Goose.Storage.Logf(1, "Monolithic reader: %s", key)
+		Goose.Storage.Logf(4, "Monolithic reader: %s", key)
 		resp, err = s.Client.GetObject(
 			context.TODO(),
 			&s3.GetObjectInput{
@@ -25,7 +25,7 @@ func (s *Sssly) NewReadCloser(key string, chunked ...bool) (io.ReadCloser, error
 			},
 		)
 	} else {
-		Goose.Storage.Logf(0, "Multipart reader: %s", key)
+		Goose.Storage.Logf(4, "Multipart reader: %s", key)
 		return &ReadCloser{
 			cli: 			s,
 			key: 			key,

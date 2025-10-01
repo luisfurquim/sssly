@@ -26,7 +26,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 	)
 
 	if s.MaxChunk > 0 {
-		MaxChunk = s.MaxChunk  * 1024
+		MaxChunk = s.MaxChunk
 	} else {
 		MaxChunk =  1024
 	}
