@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func (s *Sssly) NewReadCloser(key string, chunked ...int32) (io.ReadCloser, error) {
+func (s *Sssly) NewReadCloser(key string, chunked ...bool) (io.ReadCloser, error) {
 	var err error
 	var resp *s3.GetObjectOutput
 
