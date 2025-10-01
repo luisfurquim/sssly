@@ -66,3 +66,5 @@ var ErrOptionWrongTypeBasePath error = errors.New("Option wrong type: base path"
 
 var ErrStartingMultipartUpload error = errors.New("Error starting multipart upload")
 var ErrWrongParmCount error = errors.New("Error wrong parameter count")
+var NoBytesAvailable error = errors.New("No bytes available")
+var UnexpectedCharacter error = errors.New("Unexpected character")

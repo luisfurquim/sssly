@@ -5,5 +5,7 @@ func (rc *ReadCloser) Close() error {
 		return nil
 	}
 
+	rc.buffer = nil
+
 	return rc.remReader.Close()
 }

@@ -12,7 +12,9 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	var (
 		err error
 		resp *s3.GetObjectOutput
-		sz, n int
+		sz, n, i int
+		chunkSize int
+		chunkInfo []byte
 	)
 
 	Goose.Storage.Logf(4, "Going to read: %d, consumed: %d", rc.chunk, rc.consumed)
@@ -46,7 +48,50 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 
 		Goose.Storage.Logf(3, "Fetching new chunk: %d", rc.chunk)
 
-		for sz<len(rc.buffer) && err==nil {
+		for {
+			n, err = rc.remReader.Read(rc.buffer[i:i+1])
+			if err != nil && err != io.EOF {
+				Goose.Storage.Logf(1, "Error reading %s chunkSize on chunk[%d]: %s", rc.key, rc.chunk, err)
+				return 0, err
+			}
+			if n==0 {
+				Goose.Storage.Logf(1, "Error reading %s chunkSize on chunk[%d]: no bytes available", rc.key, rc.chunk)
+				return 0, NoBytesAvailable
+			}
+			if rc.buffer[i] == '\r' {
+				n, err = rc.remReader.Read(rc.buffer[i:i+1])
+				if err != nil && err != io.EOF {
+					Goose.Storage.Logf(1, "Error reading %s linefeed on chunk[%d]: %s", rc.key, rc.chunk, err)
+					return 0, err
+				}
+				if n==0 {
+					Goose.Storage.Logf(1, "Error reading %s linefeed on chunk[%d]: %s", rc.key, rc.chunk, NoBytesAvailable)
+					return 0, NoBytesAvailable
+				}
+				if rc.buffer[i] != '\n' {
+					Goose.Storage.Logf(1, "Error reading %s linefeed on chunk[%d]: %s", rc.key, rc.chunk, UnexpectedCharacter)
+					return 0, UnexpectedCharacter
+				}
+				break
+			} else if rc.buffer[i] >= 'a' && rc.buffer[i] <= 'f' {
+				chunkSize <<= 4
+				chunkSize += rc.buffer[i] - 'a' + 10
+			} else if rc.buffer[i] >= 'A' && rc.buffer[i] <= 'F' {
+				chunkSize <<= 4
+				chunkSize += rc.buffer[i] - 'A' + 10
+			} else if rc.buffer[i] >= '0' && rc.buffer[i] <= '9' {
+				chunkSize <<= 4
+				chunkSize += rc.buffer[i] - '0'
+			} else {
+				Goose.Storage.Logf(1, "Error reading %s chunkSize on chunk[%d]: %s", rc.key, rc.chunk, UnexpectedCharacter)
+				return 0, UnexpectedCharacter
+			}
+		}
+
+		chunkSize += 38
+		rc.buffer = make([]byte, chunkSize)
+
+		for sz<len(rc.buffer) && sz<chunkSize && err==nil {
 			Goose.Storage.Logf(4, "sz: %d", sz)
 			n, err = rc.remReader.Read(rc.buffer[sz:])
 			if err != nil && err != io.EOF {
@@ -59,10 +104,10 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		Goose.Storage.Logf(4, "sz=%d", sz)
 		rc.consumed = 0
 		sz -= 38
-		rc.rd = bytes.NewReader(rc.buffer[8:sz])
+		rc.rd = bytes.NewReader(rc.buffer[:sz])
 //		rc.rd = bytes.NewReader(rc.buffer[8:rc.chunkSize+8])
-		Goose.Storage.Logf(5, "Removing header and trailer: %d % 2x .. % 2x .. % 2x", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[sz:sz+16])
-		Goose.Storage.Logf(5, "Removing header and trailer: %d %s .. %s .. %s", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[sz:sz+16])
+		Goose.Storage.Logf(0, "Removing trailer: %d % 2x .. % 2x", rc.chunk,  rc.buffer[:8], rc.buffer[sz:])
+		Goose.Storage.Logf(0, "Removing trailer: %d %s .. %s", rc.chunk, rc.buffer[:8], rc.buffer[sz:])
 	}
 
 	n, err = rc.rd.Read(buf)

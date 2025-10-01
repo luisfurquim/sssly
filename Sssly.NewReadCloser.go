@@ -31,7 +31,6 @@ func (s *Sssly) NewReadCloser(key string, chunkSchema ...int32) (io.ReadCloser, 
 			chunkSize:  chunkSchema[1],
 			cli: 			s,
 			key: 			key,
-			buffer:     make([]byte, chunkSchema[1]+46),
 		}, nil
 	}
 
