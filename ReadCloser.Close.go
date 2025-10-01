@@ -1,5 +1,9 @@
 package sssly
 
 func (rc *ReadCloser) Close() error {
-	return rc.rd.Close()
+	if rc.remReader == nil {
+		return nil
+	}
+
+	return rc.remReader.Close()
 }

@@ -28,7 +28,8 @@ type ReadCloser struct {
 	consumed int32
 	cli *Sssly
 	key string
-	rd io.ReadCloser
+	remReader io.ReadCloser
+	rd io.Reader
 	buffer []byte
 }
 
