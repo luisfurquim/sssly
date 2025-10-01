@@ -49,7 +49,6 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		
 		defer resp.Body.Close()
 
-		Goose.Storage.Logf(3, "Fetching new chunk: %d", rc.chunk)
 		for sz<len(rc.buffer) && err==nil {
 			Goose.Storage.Logf(4, "sz: %d", sz)
 			n, err = resp.Body.Read(rc.buffer[sz:])
@@ -60,11 +59,13 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 			sz += n
 		}
 
+		Goose.Storage.Logf(0, "sz=%d", sz)
 		rc.consumed = 0
 		sz -= 38
 		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[8:sz]))
 //		rc.rd = io.NopCloser(bytes.NewReader(rc.buffer[8:rc.chunkSize+8]))
 		Goose.Storage.Logf(0, "Removing header and trailer: %d % 2x .. % 2x .. % 2x", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[sz:sz+16])
+		Goose.Storage.Logf(0, "Removing header and trailer: %d %s .. %s .. %s", rc.chunk, rc.buffer[:8], rc.buffer[8:16], rc.buffer[sz:sz+16])
 	}
 
 	n, err = rc.rd.Read(buf)
