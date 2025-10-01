@@ -34,7 +34,7 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 			return 0, err
 		}
 
-		rc.remReader = res.Body
+		rc.remReader = resp.Body
 		rc.consumed  = rc.chunkSize
 	}
 
