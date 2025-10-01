@@ -68,10 +68,13 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	n, err = rc.rd.Read(buf)
 	Goose.Storage.Logf(4, "Read %d bytes: %s", n, err)
 	if err == io.EOF {
+		Goose.Storage.Logf(0,"EOF")
 		if rc.chunk < rc.chunks {
+			Goose.Storage.Logf(0,"rc.chunk %d < rc.chunks %d", rc.chunk, rc.chunks)
 			err = nil
 			if n == 0 {
-				defer panic("Stopped!")
+				Goose.Storage.Logf(0,"n==0 panic")
+				panic("Stopped!")
 			}
 		}
 	} else if err != nil {
@@ -80,6 +83,8 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	}
 
 	rc.consumed += int32(n)
+
+	Goose.Storage.Logf(0,"done reading %d bytes", n)
 
 	return n, nil
 }
