@@ -7,15 +7,15 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func (s *Sssly) NewReadCloser(key string, chunkSchema ...int32) (io.ReadCloser, error) {
+func (s *Sssly) NewReadCloser(key string, chunked ...int32) (io.ReadCloser, error) {
 	var err error
 	var resp *s3.GetObjectOutput
 
-	if len(chunkSchema)!=0 && len(chunkSchema)!=2 {
+	if len(chunked)!=0 && len(chunked)!=1 {
 		return nil, ErrWrongParmCount
 	}
 
-	if len(chunkSchema) == 0 {
+	if len(chunked) == 0 {
 		Goose.Storage.Logf(1, "Monolithic reader: %s", key)
 		resp, err = s.Client.GetObject(
 			context.TODO(),
@@ -27,8 +27,6 @@ func (s *Sssly) NewReadCloser(key string, chunkSchema ...int32) (io.ReadCloser, 
 	} else {
 		Goose.Storage.Logf(0, "Multipart reader: %s", key)
 		return &ReadCloser{
-			chunks:     chunkSchema[0],
-			chunkSize:  chunkSchema[1],
 			cli: 			s,
 			key: 			key,
 		}, nil

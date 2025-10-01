@@ -37,14 +37,15 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 		}
 
 		rc.remReader = resp.Body
-		rc.consumed  = rc.chunkSize
+		rc.consumed  = 1
 	}
 
-	if rc.consumed >= rc.chunkSize {
-		rc.chunk++
-		if rc.chunk > rc.chunks {
+	if int(rc.consumed+38) >= len(rc.buffer) {
+		if rc.done {
 			return 0, io.EOF
 		}
+
+		rc.chunk++
 
 		Goose.Storage.Logf(3, "Fetching new chunk: %d", rc.chunk)
 
@@ -101,6 +102,9 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 				return 0, err
 			}
 			sz += n
+			if err == io.EOF {
+				rc.done = true
+			}
 		}
 
 		Goose.Storage.Logf(4, "sz=%d", sz)
@@ -117,8 +121,8 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	Goose.Storage.Logf(4, "Read %d bytes: %s", n, err)
 	if err == io.EOF {
 		Goose.Storage.Logf(3,"EOF")
-		if rc.chunk < rc.chunks {
-			Goose.Storage.Logf(3,"rc.chunk %d < rc.chunks %d", rc.chunk, rc.chunks)
+		if !rc.done {
+			Goose.Storage.Logf(3,"!rc.done")
 			if n == 0 {
 				Goose.Storage.Logf(1,"Incomplete reading!")
 				return 0, err

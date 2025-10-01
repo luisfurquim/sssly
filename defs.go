@@ -24,13 +24,14 @@ type WriteCloser struct {
 }
 
 type ReadCloser struct {
-	chunk, chunks, chunkSize int32
+	chunk int32
 	consumed int32
 	cli *Sssly
 	key string
 	remReader io.ReadCloser
 	rd io.Reader
 	buffer []byte
+	done bool
 }
 
 type GooseG struct {
