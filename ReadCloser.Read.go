@@ -12,8 +12,9 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 	var (
 		err error
 		resp *s3.GetObjectOutput
-		sz, n, i int
+		sz, n int
 		chunkSize int
+		hdrBuffer []byte
 	)
 
 	Goose.Storage.Logf(4, "Going to read: %d, consumed: %d", rc.chunk, rc.consumed)
@@ -47,8 +48,10 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 
 		Goose.Storage.Logf(3, "Fetching new chunk: %d", rc.chunk)
 
+		hdrBuffer = make([]byte, 1)
+
 		for {
-			n, err = rc.remReader.Read(rc.buffer[i:i+1])
+			n, err = rc.remReader.Read(hdrBuffer)
 			if err != nil && err != io.EOF {
 				Goose.Storage.Logf(1, "Error reading %s chunkSize on chunk[%d]: %s", rc.key, rc.chunk, err)
 				return 0, err
@@ -57,8 +60,8 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 				Goose.Storage.Logf(1, "Error reading %s chunkSize on chunk[%d]: no bytes available", rc.key, rc.chunk)
 				return 0, NoBytesAvailable
 			}
-			if rc.buffer[i] == '\r' {
-				n, err = rc.remReader.Read(rc.buffer[i:i+1])
+			if hdrBuffer[0] == '\r' {
+				n, err = rc.remReader.Read(hdrBuffer)
 				if err != nil && err != io.EOF {
 					Goose.Storage.Logf(1, "Error reading %s linefeed on chunk[%d]: %s", rc.key, rc.chunk, err)
 					return 0, err
@@ -67,20 +70,20 @@ func (rc *ReadCloser) Read(buf []byte) (int, error) {
 					Goose.Storage.Logf(1, "Error reading %s linefeed on chunk[%d]: %s", rc.key, rc.chunk, NoBytesAvailable)
 					return 0, NoBytesAvailable
 				}
-				if rc.buffer[i] != '\n' {
+				if hdrBuffer[0] != '\n' {
 					Goose.Storage.Logf(1, "Error reading %s linefeed on chunk[%d]: %s", rc.key, rc.chunk, UnexpectedCharacter)
 					return 0, UnexpectedCharacter
 				}
 				break
-			} else if rc.buffer[i] >= 'a' && rc.buffer[i] <= 'f' {
+			} else if hdrBuffer[0] >= 'a' && hdrBuffer[0] <= 'f' {
 				chunkSize <<= 4
-				chunkSize += int(rc.buffer[i] - 'a' + 10)
-			} else if rc.buffer[i] >= 'A' && rc.buffer[i] <= 'F' {
+				chunkSize += int(hdrBuffer[0] - 'a' + 10)
+			} else if hdrBuffer[0] >= 'A' && hdrBuffer[0] <= 'F' {
 				chunkSize <<= 4
-				chunkSize += int(rc.buffer[i] - 'A' + 10)
-			} else if rc.buffer[i] >= '0' && rc.buffer[i] <= '9' {
+				chunkSize += int(hdrBuffer[0] - 'A' + 10)
+			} else if hdrBuffer[0] >= '0' && hdrBuffer[0] <= '9' {
 				chunkSize <<= 4
-				chunkSize += int(rc.buffer[i] - '0')
+				chunkSize += int(hdrBuffer[0] - '0')
 			} else {
 				Goose.Storage.Logf(1, "Error reading %s chunkSize on chunk[%d]: %s", rc.key, rc.chunk, UnexpectedCharacter)
 				return 0, UnexpectedCharacter
