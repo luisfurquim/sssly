@@ -32,6 +32,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 	}
 
 	if sz < int64(MaxChunk) {
+		Goose.Storage.Logf(3, "Singlepart upload started size: %s", sz)
 		_, err = s.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 			Bucket: aws.String(s.Bucket),
 			Key:    aws.String(s.BasePath + key),
