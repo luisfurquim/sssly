@@ -2,13 +2,9 @@ package sssly
 
 import (
 	"io"
-	"sync"
 	"time"
-	"bytes"
-	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 )
 
@@ -23,7 +19,7 @@ func (s *Sssly) LargeUploadFromReader(key string, rd io.Reader) error {
 	fullKey = s.BasePath + key
 
 	uploader = manager.NewUploader(s.Client, func(u *manager.Uploader) {
-		u.PartSize = s.MaxChunk
+		u.PartSize = int64(s.MaxChunk)
 	})
 
 	_, err = uploader.Upload(s.ctx, &s3.PutObjectInput{

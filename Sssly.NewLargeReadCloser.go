@@ -2,15 +2,14 @@ package sssly
 
 import (
 	"io"
-	"context"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/feature/s3/manager"
 )
 
 func (s *Sssly) NewLargeReadCloser(key string) (io.ReadCloser, error) {
 	var (
 		err error
-		resp *s3.GetObjectOutput
 		downloader *manager.Downloader
 		lrc LargeReadCloser
 	)
@@ -19,7 +18,7 @@ func (s *Sssly) NewLargeReadCloser(key string) (io.ReadCloser, error) {
 	lrc.key = key
 
 	downloader = manager.NewDownloader(s.Client, func(d *manager.Downloader) {
-		d.PartSize = s.MaxChunk
+		d.PartSize = int64(s.MaxChunk)
 	})
 
 	go func() {
@@ -42,8 +41,7 @@ func (s *Sssly) NewLargeReadCloser(key string) (io.ReadCloser, error) {
 		lrc.mtx.Lock()
 		lrc.eof = true
 		lrc.mtx.Unlock()
-
-	}
+	}()
 
 	if err != nil {
 		Goose.Storage.Logf(1, "Error opening %s for read: %s", key, err)

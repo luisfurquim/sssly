@@ -2,6 +2,7 @@ package sssly
 
 import (
 	"io"
+	"sync"
 	"bytes"
 	"errors"
 	"context"

@@ -1,19 +1,9 @@
 package sssly
 
-import (
-	"io"
-	"bytes"
-	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
-)
-
 func (lrc *LargeReadCloser) WriteAt(p []byte, off int64) (int, error) {
 	var (
-		n int
-		err error
 		buf []byte
-		ok book
+		ok bool
 	)
 
 	buf = make([]byte, len(p))
@@ -24,7 +14,7 @@ func (lrc *LargeReadCloser) WriteAt(p []byte, off int64) (int, error) {
 	if lrc.off == off {
 		lrc.ready = append(lrc.ready, buf)
 		for ok {
-			lrc.off += len(buf)
+			lrc.off += int64(len(buf))
 			if buf, ok = lrc.ahead[lrc.off]; ok {
 				lrc.ready = append(lrc.ready, buf)
 				delete(lrc.ahead, lrc.off)

@@ -2,22 +2,14 @@ package sssly
 
 import (
 	"io"
-	"bytes"
-	"context"
-	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
 func (lrc *LargeReadCloser) Read(buf []byte) (int, error) {
 	var (
-		err error
-		resp *s3.GetObjectOutput
 		sz, n, i int
-		chunkSize int
-		hdrBuffer []byte
 	)
 
-	Goose.Storage.Logf(4, "Going to read: %d, consumed: %d", rc.chunk, rc.consumed)
+	Goose.Storage.Logf(4, "Going to read: %#v %#v", lrc.ready, lrc.ahead)
 
 	lrc.mtx.Lock()
 	defer lrc.mtx.Unlock()
@@ -29,7 +21,7 @@ func (lrc *LargeReadCloser) Read(buf []byte) (int, error) {
 		return 0, nil
 	}
 
-	if len(buf) < (lrc.off - lrc.consumed) {
+	if len(buf) < int(lrc.off - lrc.consumed) {
 		sz = int(lrc.off - lrc.consumed)
 	} else {
 		sz = len(buf)
