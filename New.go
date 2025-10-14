@@ -108,9 +108,10 @@ func New(opt Opt) (*Sssly, error) {
 	}
 
 	cli.BasePath = filepath.Clean(cli.BasePath) + "/"
+	cli.ctx = context.TODO()
 
 	cfg, err = config.LoadDefaultConfig(
-		context.TODO(),
+		cli.ctx,
 		config.WithRegion(region),
 		config.WithHTTPClient(hcli),
 		config.WithSharedCredentialsFiles(strings.Split(credFiles,",")),

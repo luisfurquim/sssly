@@ -4,6 +4,7 @@ import (
 	"io"
 	"bytes"
 	"errors"
+	"context"
 	"github.com/luisfurquim/goose"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
@@ -15,6 +16,7 @@ type Sssly struct {
 	BasePath string
 	MaxChunk int
 	Client *s3.Client
+	ctx context.Context
 }
 
 type WriteCloser struct {
@@ -32,6 +34,17 @@ type ReadCloser struct {
 	rd io.Reader
 	buffer []byte
 	done bool
+}
+
+type LargeReadCloser struct {
+	cli *Sssly
+	key string
+	off int64
+	consumed int64
+	ready [][]byte
+	ahead map[int64][]byte
+	eof bool
+	mtx sync.Mutex
 }
 
 type GooseG struct {

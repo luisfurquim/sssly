@@ -15,7 +15,7 @@ func (s *Sssly) NewReadCloser(key string, chunked ...bool) (io.ReadCloser, error
 		return nil, ErrWrongParmCount
 	}
 
-	if len(chunked) == 0 {
+	if len(chunked) == 0 || !chunked[0] {
 		Goose.Storage.Logf(4, "Monolithic reader: %s", key)
 		resp, err = s.Client.GetObject(
 			context.TODO(),
