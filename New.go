@@ -116,7 +116,7 @@ func New(opt Opt) (*Sssly, error) {
 		config.WithHTTPClient(hcli),
 		config.WithSharedCredentialsFiles(strings.Split(credFiles,",")),
 		config.WithSharedConfigProfile(profile),
-		config.WithRequestChecksumCalculation(aws.ChecksumCalculationWhenRequired),
+		config.WithRequestChecksumCalculation(aws.RequestChecksumCalculationWhenRequired),
 	)
 	if err != nil {
 		Goose.Init.Logf(1, "Error initializing config: %s", err)
