@@ -36,7 +36,7 @@ func (s *Sssly) UploadFromReader(key string, rd io.Reader, sz int64) error {
 		_, err = s.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 			Bucket: aws.String(s.Bucket),
 			Key:    aws.String(s.BasePath + key),
-			ContentLength: &sz,
+//			ContentLength: &sz,
 			Body:   rd,
 		})
 
